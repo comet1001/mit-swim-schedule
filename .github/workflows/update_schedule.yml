@@ -1,0 +1,35 @@
+name: Update Swimming Pool Schedule
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Runs every day at 2 AM UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: pip install requests beautifulsoup4
+
+    - name: Run scraper and generate HTML
+      run: |
+        python scraper.py
+        python generate_html.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add schedule.json index.html
+        git commit -m "Automated update: Swimming pool schedule" || echo "No changes to commit"
+        git push
